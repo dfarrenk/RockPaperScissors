@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Rock Paper Scissors</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <!--
+    <link rel="stylesheet" type="text/css" href="assets/css/style.css">
+    -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.19.2/moment.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <style>
+        .btn,
+        .jumbotron,
+        .panel>.panel-heading {
+            background-image: none;
+            background-color: maroon;
+            color: white;
+
+        }
+
+        h3: {
+            text-align: center
+        }
+    </style>
+</head>
+
+<body>
+    <br>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-offset-1 col-md-10">
+                <div class="jumbotron">
+                    <h2>Rock Paper Scissors</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-md-offset-1 col-md-10">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Playing Field</h3>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-8">
+                            <div class="panel-body">
+                                <div class="input-group">
+                                    <span class="input-group-btn">
+                                        <button class="btn btn-default" type="button" id="submit-name">Go!</button>
+                                    </span>
+                                    <input type="text" class="form-control" placeholder="Name" id="field-name">
+                                </div>
+                            </div>
+                        </div>
+                        <!-- /input-group -->
+                    </div>
+                    <!-- /.col-lg-6 -->
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <div>Player 1
+                            </div>
+                            <div class="btn-group btn-group-justified" role="group" aria-label="...">
+                                <div class="btn-group" role="group">
+                                    <button type="button" class="btn btn-default" id="player-one-rock">Rock</button>
+                                </div>
+                                <div class="btn-group" role="group">
+                                    <button type="button" class="btn btn-default" id="player-one-paper">Paper</button>
+                                </div>
+                                <div class="btn-group" role="group">
+                                    <button type="button" class="btn btn-default" id="player-one-scissors">Scissors</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-1 ">
+                        </div>
+                        <div class="col-sm-2 ">
+                            Results!
+                        </div>
+                        <div class="col-sm-1 ">
+                        </div>
+                        <div class="col-sm-4">
+                            <div>Player 2
+                            </div>
+                            <div class="btn-group btn-group-justified" role="group" aria-label="...">
+                                <div class="btn-group" role="group">
+                                    <button type="button" class="btn btn-default" id="player-two-rock">Rock</button>
+                                </div>
+                                <div class="btn-group" role="group">
+                                    <button type="button" class="btn btn-default" id="player-two-scissors">Paper</button>
+                                </div>
+                                <div class="btn-group" role="group">
+                                    <button type="button" class="btn btn-default" id="player-two-three">Scissors</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-offset-1 col-md-10">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Chatbox goes here why not</h3>
+                    </div>
+                    <div class="panel-body">
+                        <div class="input-group">
+                            <span class="input-group-btn">
+                                        <button class="btn btn-default" type="button" id="submit-chat">Go!</button>
+                                    </span>
+                            <input type="text" class="form-control" placeholder="Chat" id="field-chat">
+                        </div>
+                        <hr>
+                        <div id="messages"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom JavaScript -->
+
+    <script src="https://www.gstatic.com/firebasejs/4.6.2/firebase.js"></script>
+    <script>
+        // Initialize Firebase
+        /* global firebase*/
+        var config = {
+            apiKey: "AIzaSyAkJCQUJ5Mg6lR1ptnb-KYTqQJ5yXOnLFY",
+            authDomain: "rock-paper-scissors-186221.firebaseapp.com",
+            databaseURL: "https://rock-paper-scissors-186221.firebaseio.com",
+            projectId: "rock-paper-scissors-186221",
+            storageBucket: "rock-paper-scissors-186221.appspot.com",
+            messagingSenderId: "1028849307609"
+        };
+        firebase.initializeApp(config);
+        var db = firebase.database();
+
+        // since I can connect from multiple devices or browser tabs, we store each connection instance separately
+        // any time that connectionsRef's value is null (i.e. has no children) I am offline
+        $("#subit-name").click(function() {
+
+        });
+        var myConnectionsRef = firebase.database().ref('users/joe/connections');
+        // stores the timestamp of my last disconnect (the last time I was seen online)
+        var lastOnlineRef = firebase.database().ref('users/joe/lastOnline');
+
+        var connectedRef = firebase.database().ref('.info/connected');
+        connectedRef.on('value', function(snap) {
+            if (snap.val() === true) {
+                // We're connected (or reconnected)! Do anything here that should happen only if online (or on reconnect)
+                var con = myConnectionsRef.push();
+                var mg = firebase.database().ref('chat')
+                // When I disconnect, remove this device
+                con.onDisconnect().remove();
+                //Remove chat history on disconnect
+                mg.onDisconnect().remove();
+                // Add this device to my connections list
+                // this value could contain info about the device or a timestamp too
+                con.set(true);
+                // When I disconnect, update the last time I was seen online
+                lastOnlineRef.onDisconnect().set(firebase.database.ServerValue.TIMESTAMP);
+            }
+        });
+
+        $(document)
+
+        /** Chat event**/
+        $("#submit-chat").click(function() {
+            //var msgUser = $("#username").val();
+            //TODO grab username
+            var msgUser = "Test: ";
+            var msgText = $("#field-chat").val();
+            db.ref('chat').push({ username: msgUser, text: msgText });
+            $("#field-chat").val("");
+        });
+
+        /** Function to add a data listener **/
+        db.ref('chat').on('child_added', function(snapshot) {
+            var msg = snapshot.val();
+            var msgUsername = $("<b>").text(msg.username);
+            var msgText = $("<p>").text(msg.text);
+
+            var msgElement = $("<div>")
+                .append(msgUsername)
+                .append(msgText)
+                .addClass("msg");
+
+            $("#messages").prepend(msgElement);
+        });
+
+        // Game Logic:
+        function gameLogic(playerOneMove, playerTwoMove) {
+            switch (playerOneMove) {
+                case 'rock':
+                    switch (playerTwoMove) {
+                        case 'rock':
+                            return 'draw';
+                        case 'paper':
+                            return 'playerTwoWin';
+                        case 'scissors':
+                            return 'playerOneWin';
+                    }
+                    break;
+                case 'paper':
+                    switch (playerTwoMove) {
+                        case 'rock':
+                            return 'playerOneWin';
+                        case 'paper':
+                            return 'draw';
+                        case 'scissors':
+                            return 'playerTwoWin';
+                    }
+                    break;
+                case 'scissors':
+                    switch (playerTwoMove) {
+                        case 'rock':
+                            return 'playerTwoWin';
+                        case 'paper':
+                            return 'playerOneWin';
+                        case 'scissors':
+                            return 'draw';
+                    }
+                    break;
+            }
+        }
+    </script>
+    <!--
+    <script type="text/javascript" src="assets/javascript/app.js"></script>
+    -->
+</body>
+
+
+</html>
